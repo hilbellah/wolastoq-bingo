@@ -7,8 +7,8 @@
   html { scroll-behavior: smooth; }
   body {
     font-family: 'Inter', system-ui, sans-serif;
-    background-color: #F0F4FF;
-    color: #1e293b;
+    background-color: #F5F3EE;
+    color: #1e2226;
   }
 }
 
@@ -30,7 +30,7 @@
     @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0;
   }
   .step-badge.done     { @apply bg-green-500 text-white; }
-  .step-badge.active   { @apply bg-navy text-white; }
+  .step-badge.active   { @apply bg-orange text-white; }
   .step-badge.pending  { @apply bg-slate-200 text-slate-500; }
 
   /* Seat bubbles */
@@ -53,20 +53,20 @@
 
   /* Buttons */
   .btn-primary {
-    @apply bg-navy text-white font-semibold px-6 py-3 rounded-xl
-           hover:bg-navy-light active:bg-navy-dark
+    @apply bg-orange text-white font-semibold px-6 py-3 rounded-xl
+           hover:bg-orange-light active:bg-orange-dark
            transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
            shadow-sm hover:shadow-md;
   }
   .btn-gold {
-    @apply bg-gold text-white font-bold px-8 py-3.5 rounded-xl text-base
+    @apply bg-gold text-navy font-bold px-8 py-3.5 rounded-xl text-base
            hover:bg-gold-light active:bg-gold-dark
            transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
            shadow-md hover:shadow-lg;
   }
   .btn-outline {
-    @apply border-2 border-navy text-navy font-semibold px-6 py-3 rounded-xl
-           hover:bg-navy hover:text-white transition-all duration-150;
+    @apply border-2 border-orange text-orange font-semibold px-6 py-3 rounded-xl
+           hover:bg-orange hover:text-white transition-all duration-150;
   }
 }
 
@@ -76,7 +76,7 @@
   display: block;
   width: 0;
   height: 2px;
-  background: #C9A84C;
+  background: #ED710D;
   transition: width 0.3s;
 }
 .nav-link:hover::after { width: 100%; }

@@ -24,12 +24,12 @@ const STYLES = `
     100% { transform: scale(1.04) rotate(1deg); opacity:1; }
   }
   @keyframes bingo-glow {
-    0%,100% { text-shadow: 0 0 14px #C9A84Ccc, 0 0 36px #C9A84C55; }
-    50%      { text-shadow: 0 0 32px #ffe97a,   0 0 70px #C9A84Ccc;  }
+    0%,100% { text-shadow: 0 0 14px #FDD01Fcc, 0 0 36px #FDD01F55; }
+    50%      { text-shadow: 0 0 32px #fff59a,   0 0 70px #FDD01Fcc;  }
   }
   @keyframes win-ring {
-    0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
-    50%      { box-shadow: 0 0 0 3px rgba(201,168,76,.8); }
+    0%,100% { box-shadow: 0 0 0 0 rgba(253,208,31,0); }
+    50%      { box-shadow: 0 0 0 3px rgba(253,208,31,.8); }
   }
 
   /* ── 8 pre-defined fall paths — NO css vars in transforms ── */
@@ -60,7 +60,7 @@ const STYLES = `
   }
 
   .gold-text {
-    background: linear-gradient(90deg, #a06b10 0%, #e8c850 25%, #fff9c0 50%, #e8c850 75%, #a06b10 100%);
+    background: linear-gradient(90deg, #C45E08 0%, #ED710D 20%, #FDD01F 45%, #F59B17 65%, #ED710D 80%, #C45E08 100%);
     background-size: 500px 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -82,7 +82,7 @@ const STYLES = `
 `;
 
 const CF_NAMES = ['cf1','cf2','cf3','cf4','cf5','cf6','cf7','cf8'];
-const COLORS   = ['#e53e3e','#4299e1','#48bb78','#ed8936','#9f7aea','#C9A84C','#fff','#f472b6','#fb923c','#34d399'];
+const COLORS   = ['#e53e3e','#4299e1','#48bb78','#ED710D','#9f7aea','#FDD01F','#fff','#f472b6','#F59B17','#34d399'];
 const CARD     = [
   [ 7, 17, 33, 47, 63],
   [ 3, 22, 39, 52, 71],
@@ -101,7 +101,7 @@ const PATTERNS = [
 
 /* ── Bingo ball SVG ── */
 function Ball({ col, label, size = 42 }) {
-  const color  = COL_CLR[col] ?? '#C9A84C';
+  const color  = COL_CLR[col] ?? '#FDD01F';
   const id     = `hb_${label}`;
   const letter = COLS[col] ?? '';
   const num    = label.replace(/[A-Za-z]/g, '');
@@ -256,7 +256,7 @@ function LiveBingoCard() {
       {/* BINGO flash */}
       {bingo && (
         <div style={{ position:'absolute', top:52, left:0, right:0, bottom:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:10, pointerEvents:'none' }}>
-          <div className="bingo-appear" style={{ fontWeight:900, fontSize:38, letterSpacing:'0.12em', color:'#C9A84C', WebkitTextStroke:'1px rgba(201,168,76,.3)' }}>
+          <div className="bingo-appear" style={{ fontWeight:900, fontSize:38, letterSpacing:'0.12em', color:'#FDD01F', WebkitTextStroke:'1px rgba(253,208,31,.3)' }}>
             BINGO!
           </div>
         </div>
@@ -277,7 +277,7 @@ function LiveBingoCard() {
             const hit    = called.has(k);
             const win    = wins.has(k);
             const isFree = num == null;
-            const bg     = win ? `${COL_CLR[c]}ee` : hit ? `${COL_CLR[c]}55` : isFree ? 'rgba(201,168,76,.2)' : 'rgba(0,14,45,.72)';
+            const bg     = win ? `${COL_CLR[c]}ee` : hit ? `${COL_CLR[c]}55` : isFree ? 'rgba(253,208,31,.2)' : 'rgba(0,14,45,.72)';
             return (
               <div key={k}
                 className={`${hit && !win ? 'cell-pop-in' : ''} ${win ? 'win-cell' : ''}`}
@@ -289,7 +289,7 @@ function LiveBingoCard() {
                   textShadow: win ? `0 0 10px #fff,0 0 18px ${COL_CLR[c]}` : hit ? `0 0 6px ${COL_CLR[c]}` : 'none',
                   transition:'background .22s',
                 }}>
-                {isFree ? <span style={{ fontSize:9, fontWeight:900, color:'#C9A84C' }}>FREE</span> : num}
+                {isFree ? <span style={{ fontSize:9, fontWeight:900, color:'#FDD01F' }}>FREE</span> : num}
               </div>
             );
           }))}
@@ -328,26 +328,28 @@ export default function Header() {
     // No cleanup: styles must stay for child components (Confetti) to animate
   }, []);
 
-  const txt = '🎱 BONANZA JACKPOT $50,000  ·  💰 NIGHTLY JACKPOTS $5,000  ·  🎉 BINGO 6 NIGHTS A WEEK  ·  🏆 ATLANTIC CANADA\'S LARGEST BINGO HALL  ·  🕓 DOORS 4:30 PM · GAMES 6:00 PM  ·  📍 385 WILSEY RD, FREDERICTON NB  ·  🔒 BOOK NOW  ·  ';
+  const txt = '🎱 BONANZA JACKPOT $50,000  ·  💰 NIGHTLY JACKPOTS $5,000  ·  🎉 BINGO 6 NIGHTS A WEEK  ·  🏆 ATLANTIC CANADA\'S LARGEST BINGO HALL  ·  🕓 DOORS 3:00 PM · ADMISSIONS 4:30 PM  ·  📍 185 GABRIEL DRIVE, FREDERICTON NB  ·  🔒 BOOK NOW  ·  ';
 
   return (
     <header style={{
-      background:'linear-gradient(160deg,#000d2e 0%,#001640 50%,#000d2e 100%)',
+      background:'linear-gradient(160deg,#0d0f12 0%,#1a1e23 50%,#0d0f12 100%)',
       position:'relative', overflow:'hidden',
     }}>
       {/* Glow overlays */}
-      <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 55% 90% at 72% 50%,rgba(90,50,200,.1) 0%,transparent 65%),radial-gradient(ellipse 38% 65% at 20% 50%,rgba(201,168,76,.07) 0%,transparent 55%)' }}/>
-      <div style={{ position:'absolute', inset:0, pointerEvents:'none', backgroundImage:'linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px)', backgroundSize:'40px 40px' }}/>
+      <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 55% 90% at 72% 50%,rgba(237,113,13,.08) 0%,transparent 65%),radial-gradient(ellipse 38% 65% at 20% 50%,rgba(253,208,31,.06) 0%,transparent 55%)' }}/>
+      <div style={{ position:'absolute', inset:0, pointerEvents:'none', backgroundImage:'linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px)', backgroundSize:'40px 40px' }}/>
 
-      {/* ── TOP BAR — thin strip ── */}
-      <div style={{ position:'relative', zIndex:10, maxWidth:1400, margin:'0 auto', padding:'7px 20px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:16, borderBottom:'1px solid rgba(201,168,76,.12)' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-          <span className="live-dot" style={{ width:7, height:7, borderRadius:'50%', background:'#4ade80', display:'inline-block', boxShadow:'0 0 5px #4ade80', flexShrink:0 }}/>
-          <span style={{ fontSize:10.5, fontWeight:700, color:'rgba(255,255,255,.55)', textTransform:'uppercase', letterSpacing:'0.1em' }}>Wolastoq Casino · Live Booking</span>
-        </div>
-        <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-          <span style={{ fontSize:10.5, fontWeight:600, color:'rgba(201,168,76,.7)' }}>🎱 Bingo 6 Nights a Week</span>
-          <span style={{ fontSize:10.5, fontWeight:600, color:'rgba(255,255,255,.4)' }}>📍 Fredericton, NB</span>
+      {/* ── TOP BAR — yellow brand strip matching stmec.com ── */}
+      <div style={{ background:'#FDD01F', position:'relative', zIndex:10 }}>
+        <div style={{ maxWidth:1400, margin:'0 auto', padding:'6px 20px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:16 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <span className="live-dot" style={{ width:7, height:7, borderRadius:'50%', background:'#16a34a', display:'inline-block', boxShadow:'0 0 5px #16a34a88', flexShrink:0 }}/>
+            <span style={{ fontSize:10.5, fontWeight:800, color:'#1E2226', textTransform:'uppercase', letterSpacing:'0.1em' }}>Wolastoq Casino · Live Booking</span>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+            <span style={{ fontSize:10.5, fontWeight:700, color:'#32373C' }}>🎱 Bingo 6 Nights a Week</span>
+            <span style={{ fontSize:10.5, fontWeight:600, color:'#32373C' }}>📍 Fredericton, NB</span>
+          </div>
         </div>
       </div>
 
@@ -355,12 +357,12 @@ export default function Header() {
       <div style={{ position:'relative', zIndex:10, maxWidth:1400, margin:'0 auto', padding:'14px 24px 16px', display:'flex', alignItems:'center', gap:0 }}>
 
         {/* ── LEFT: St. Mary's identity ── */}
-        <div style={{ flex:'1 1 0', minWidth:0, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', paddingRight:24, borderRight:'1px solid rgba(201,168,76,.18)' }}>
-          <div className="logo-float" style={{ width:68, height:68, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', background:'radial-gradient(circle at 35% 30%,rgba(201,168,76,.55),rgba(0,14,50,.95))', border:'2.5px solid rgba(201,168,76,.6)', boxShadow:'0 0 28px rgba(201,168,76,.4),0 0 60px rgba(201,168,76,.12)', marginBottom:10 }}>
+        <div style={{ flex:'1 1 0', minWidth:0, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', paddingRight:24, borderRight:'1px solid rgba(253,208,31,.18)' }}>
+          <div className="logo-float" style={{ width:68, height:68, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', background:'radial-gradient(circle at 35% 30%,rgba(253,208,31,.5),rgba(10,12,16,.95))', border:'2.5px solid rgba(253,208,31,.65)', boxShadow:'0 0 28px rgba(237,113,13,.45),0 0 60px rgba(253,208,31,.12)', marginBottom:10 }}>
             <svg viewBox="0 0 40 40" width="38" height="38" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="20,2 24,14 38,14 27,22 31,34 20,26 9,34 13,22 2,14 16,14" fill="#C9A84C"/>
-              <circle cx="20" cy="20" r="7" fill="#000d2e"/>
-              <text x="20" y="24" textAnchor="middle" fontSize="6.5" fontWeight="900" fill="#C9A84C" fontFamily="'Arial Black',Arial,sans-serif">WC</text>
+              <polygon points="20,2 24,14 38,14 27,22 31,34 20,26 9,34 13,22 2,14 16,14" fill="#FDD01F"/>
+              <circle cx="20" cy="20" r="7" fill="#0d0f12"/>
+              <text x="20" y="24" textAnchor="middle" fontSize="6.5" fontWeight="900" fill="#FDD01F" fontFamily="'Arial Black',Arial,sans-serif">WC</text>
             </svg>
           </div>
           <h1 style={{ fontSize:19, fontWeight:900, color:'#fff', lineHeight:1.2, margin:'0 0 3px', textShadow:'0 2px 12px rgba(0,0,0,.9)' }}>
@@ -368,11 +370,11 @@ export default function Header() {
             <span style={{ fontSize:13, fontWeight:700, color:'rgba(255,255,255,.65)', letterSpacing:'0.04em' }}>Entertainment Centre</span>
           </h1>
           <p className="gold-text" style={{ fontSize:8.5, fontWeight:700, letterSpacing:'0.2em', margin:'6px 0 8px' }}>✦ YOUR WINNING DESTINATION ✦</p>
-          <div style={{ display:'flex', alignItems:'center', gap:5, borderRadius:999, padding:'5px 12px', background:'rgba(255,255,255,.06)', border:'1px solid rgba(201,168,76,.28)', marginBottom:8 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:5, borderRadius:999, padding:'5px 12px', background:'rgba(255,255,255,.06)', border:'1px solid rgba(253,208,31,.28)', marginBottom:8 }}>
             <span className="live-dot" style={{ width:7, height:7, borderRadius:'50%', background:'#4ade80', display:'inline-block', boxShadow:'0 0 5px #4ade80' }}/>
             <span style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,.65)', textTransform:'uppercase', letterSpacing:'0.1em' }}>Wolastoq Casino</span>
           </div>
-          <p style={{ fontSize:9.5, color:'rgba(255,255,255,.3)', margin:0 }}>📍 385 Wilsey Rd, Fredericton NB</p>
+          <p style={{ fontSize:9.5, color:'rgba(255,255,255,.3)', margin:0 }}>📍 185 Gabriel Drive, Fredericton NB</p>
         </div>
 
         {/* ── MIDDLE: Book Your Bingo Seat ── */}
@@ -383,17 +385,17 @@ export default function Header() {
           </h2>
           <p style={{ color:'rgba(255,255,255,.42)', fontSize:11.5, lineHeight:1.55, margin:'0 0 12px', maxWidth:320 }}>
             Reserve your seat & choose your package before you arrive.{' '}
-            <span style={{ color:'#C9A84C' }}>Largest bingo hall in Atlantic Canada.</span>
+            <span style={{ color:'#FDD01F' }}>Largest bingo hall in Atlantic Canada.</span>
           </p>
           <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:7, marginBottom:10 }}>
-            <Stat icon="💰" value="$5,000"  label="Nightly Jackpot" color="#ed8936" delay={0}  />
-            <Stat icon="🏆" value="$50,000" label="Bonanza Jackpot" color="#C9A84C" delay={.1} />
+            <Stat icon="💰" value="$5,000"  label="Nightly Jackpot" color="#ED710D" delay={0}  />
+            <Stat icon="🏆" value="$50,000" label="Bonanza Jackpot" color="#FDD01F" delay={.1} />
             <Stat icon="🕓" value="4:30 PM" label="Doors Open"      color="#4299e1" delay={.2} />
             <Stat icon="🎱" value="6:00 PM" label="Games Start"     color="#48bb78" delay={.3} />
           </div>
           <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:5 }}>
             {[['🔒','30-min hold'],['📍','Pick your table'],['💳','Pay online'],['🎉','Instant confirm']].map(([ic,tx]) => (
-              <span key={tx} style={{ display:'inline-flex', alignItems:'center', gap:4, borderRadius:999, padding:'4px 10px', fontSize:10, fontWeight:600, background:'rgba(201,168,76,.1)', border:'1px solid rgba(201,168,76,.25)', color:'rgba(255,255,255,.6)' }}>
+              <span key={tx} style={{ display:'inline-flex', alignItems:'center', gap:4, borderRadius:999, padding:'4px 10px', fontSize:10, fontWeight:600, background:'rgba(253,208,31,.1)', border:'1px solid rgba(253,208,31,.25)', color:'rgba(255,255,255,.6)' }}>
                 {ic} {tx}
               </span>
             ))}
@@ -401,14 +403,14 @@ export default function Header() {
         </div>
 
         {/* ── RIGHT: Live bingo card ── */}
-        <div className="md-bingo-show" style={{ flexShrink:0, display:'none', paddingLeft:24, borderLeft:'1px solid rgba(201,168,76,.18)' }}>
+        <div className="md-bingo-show" style={{ flexShrink:0, display:'none', paddingLeft:24, borderLeft:'1px solid rgba(253,208,31,.18)' }}>
           <LiveBingoCard/>
         </div>
       </div>
 
       {/* ── TICKER ── */}
-      <div className="ticker-wrap" style={{ position:'relative', zIndex:10, padding:'5px 0', background:'rgba(0,0,0,.38)', borderTop:'1px solid rgba(201,168,76,.18)', borderBottom:'1px solid rgba(201,168,76,.18)' }}>
-        <div className="ticker-move" style={{ color:'rgba(201,168,76,.75)', fontSize:11, fontWeight:700, letterSpacing:'0.14em', paddingRight:60 }}>
+      <div className="ticker-wrap" style={{ position:'relative', zIndex:10, padding:'5px 0', background:'rgba(0,0,0,.5)', borderTop:'1px solid rgba(253,208,31,.2)', borderBottom:'1px solid rgba(253,208,31,.2)' }}>
+        <div className="ticker-move" style={{ color:'rgba(253,208,31,.85)', fontSize:11, fontWeight:700, letterSpacing:'0.14em', paddingRight:60 }}>
           {txt}{txt}
         </div>
       </div>

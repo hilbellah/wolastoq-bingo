@@ -4,8 +4,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        navy:  { DEFAULT: '#003087', light: '#004BBF', dark: '#001F5A' },
-        gold:  { DEFAULT: '#C9A84C', light: '#E2C76B', dark: '#A07D2A' },
+        // St. Mary's / Wolastoq Casino brand palette (from stmec.com)
+        navy:   { DEFAULT: '#32373C', light: '#4A5057', dark: '#1E2226' }, // charcoal nav
+        gold:   { DEFAULT: '#FDD01F', light: '#FFE150', dark: '#D4AC00' }, // brand yellow
+        orange: { DEFAULT: '#ED710D', light: '#F59B17', dark: '#C45E08' }, // brand orange
+        stblue: { DEFAULT: '#2665A1', light: '#3A80C4', dark: '#1A4A7A' }, // St. Mary's blue
         bingo: {
           vacant:   '#22C55E',
           held:     '#F59E0B',

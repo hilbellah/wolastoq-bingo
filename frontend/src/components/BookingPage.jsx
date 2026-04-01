@@ -64,7 +64,7 @@ function BookingPanel({
   return (
     <div className="flex flex-col gap-4">
       {/* Session info */}
-      <div className="bg-navy text-white rounded-xl p-4">
+      <div className="bg-orange text-white rounded-xl p-4">
         <p className="font-extrabold text-sm">{dateStr}</p>
         <p className="text-xs text-white/60 mt-0.5">
           Doors {session.doors_open} · Game {session.time} · 385 Wilsey Rd, Fredericton
@@ -93,7 +93,7 @@ function BookingPanel({
                 disabled={i > currentIdx}
                 onClick={() => i < currentIdx && setStep(s)}
                 className={`flex-1 py-2 border-b-2 transition-colors
-                  ${step === s ? 'border-navy text-navy' :
+                  ${step === s ? 'border-orange text-orange' :
                     i < currentIdx ? 'border-transparent text-slate-400 hover:text-slate-600 cursor-pointer' :
                     'border-transparent text-slate-300 cursor-default'}`}>
                 {i < currentIdx ? '✓ ' : ''}{label.replace(/^\d\. /, '')}
@@ -329,7 +329,7 @@ export default function BookingPage() {
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm mb-5">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h2 className="text-base font-extrabold text-navy">Select a Bingo Night</h2>
+              <h2 className="text-base font-extrabold text-orange">Select a Bingo Night</h2>
               <p className="text-xs text-slate-400 mt-0.5">Pick a date — the seat map updates instantly</p>
             </div>
             {sessions.length > 0 && (
@@ -366,15 +366,15 @@ export default function BookingPage() {
                           <button key={session.id} disabled={isFull} onClick={() => selectSession(session)}
                             className={`rounded-xl border-2 px-3 py-2 text-left transition-all flex-shrink-0 w-[100px]
                               ${isSelected
-                                ? 'bg-navy border-navy text-white shadow-md'
+                                ? 'bg-orange border-orange text-white shadow-md'
                                 : isFull
                                 ? 'bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed'
-                                : 'bg-white border-slate-200 hover:border-navy/40 hover:shadow-sm cursor-pointer'}`}>
+                                : 'bg-white border-slate-200 hover:border-orange/40 hover:shadow-sm cursor-pointer'}`}>
                             <p className={`text-[10px] font-bold uppercase tracking-wide
                               ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>
                               {d.toLocaleDateString('en-CA', { weekday: 'short' })}
                             </p>
-                            <p className={`text-xl font-extrabold leading-tight ${isSelected ? 'text-white' : 'text-navy'}`}>
+                            <p className={`text-xl font-extrabold leading-tight ${isSelected ? 'text-white' : 'text-orange'}`}>
                               {d.getDate()} <span className="text-sm font-semibold">
                                 {d.toLocaleDateString('en-CA', { month: 'short' })}
                               </span>
@@ -382,7 +382,7 @@ export default function BookingPage() {
                             <p className={`text-[11px] font-medium mt-0.5
                               ${isSelected ? 'text-white/70' : 'text-slate-500'}`}>{session.time}</p>
                             <div className={`w-full rounded-full h-1 mt-1.5 ${isSelected ? 'bg-white/20' : 'bg-slate-100'}`}>
-                              <div className={`h-1 rounded-full ${isSelected ? 'bg-gold' : pct >= 80 ? 'bg-red-400' : 'bg-navy/40'}`}
+                              <div className={`h-1 rounded-full ${isSelected ? 'bg-gold' : pct >= 80 ? 'bg-red-400' : 'bg-orange/40'}`}
                                 style={{ width: `${pct}%` }} />
                             </div>
                             <p className={`text-[10px] font-semibold mt-0.5
@@ -410,7 +410,7 @@ export default function BookingPage() {
             {/* Hall Map */}
             <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
               <div className="mb-4">
-                <h2 className="text-base font-extrabold text-navy">
+                <h2 className="text-base font-extrabold text-orange">
                   {selectedSession
                     ? `Seat Map — ${new Date(selectedSession.date + 'T12:00:00').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' })}`
                     : 'Seat Map'}
@@ -444,7 +444,7 @@ export default function BookingPage() {
             {/* Table Layout — shown when a table is selected */}
             {activeTable && activeTableSeats.length > 0 && (
               <div ref={tableSectionRef}
-                className="bg-white rounded-2xl border-2 border-navy/20 p-5 shadow-sm">
+                className="bg-white rounded-2xl border-2 border-orange/20 p-5 shadow-sm">
                 <TableLayout
                   tableNum={activeTable}
                   seats={activeTableSeats}
@@ -460,7 +460,7 @@ export default function BookingPage() {
           {/* RIGHT: Booking Panel (sticky) */}
           <div className="w-full xl:w-[380px] xl:sticky xl:top-4 flex-shrink-0">
             <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-              <h2 className="text-base font-extrabold text-navy mb-4">
+              <h2 className="text-base font-extrabold text-orange mb-4">
                 {booking ? '🎉 Booking Confirmed!' : 'Your Booking'}
               </h2>
               <BookingPanel
