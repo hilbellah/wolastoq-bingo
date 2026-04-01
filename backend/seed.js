@@ -22,7 +22,7 @@ const insertPkg = db.prepare(`
 `);
 
 const reqPkg = insertPkg.run('12up / Toonie',            18.00, 'required', '12-up Admission Book + Toonie Ball — required for every player', 1);
-               insertPkg.run('3 Special Books (1 Free)', 14.00, 'optional', 'Purchase 2 Special Books and get 1 Free', 2);
+const optPkg = insertPkg.run('3 Special Books (1 Free)', 14.00, 'optional', 'Purchase 2 Special Books and get 1 Free', 2);
                insertPkg.run('Single Special Book',       7.00, 'optional', 'Single Special Book', 3);
                insertPkg.run('6 up Admission Book',       5.00, 'optional', '6-up Admission Book', 4);
                insertPkg.run('3 up Admission Book',       3.00, 'optional', '3-up Admission Book', 5);
