@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #F0F4FF;
+    color: #1e293b;
+  }
+}
+
+@layer components {
+  /* Booking Section Card */
+  .booking-section {
+    @apply bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden transition-all duration-300;
+  }
+  .booking-section.active {
+    @apply shadow-md border-navy/20;
+  }
+  .booking-section.locked {
+    @apply opacity-60 pointer-events-none;
+  }
+  .section-header {
+    @apply flex items-center gap-3 p-5 border-b border-slate-100;
+  }
+  .step-badge {
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0;
+  }
+  .step-badge.done     { @apply bg-green-500 text-white; }
+  .step-badge.active   { @apply bg-navy text-white; }
+  .step-badge.pending  { @apply bg-slate-200 text-slate-500; }
+
+  /* Seat bubbles */
+  .seat-btn {
+    @apply w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold
+           border-2 cursor-pointer transition-all duration-150 select-none;
+  }
+  .seat-btn.vacant  { @apply bg-bingo-vacant/10 border-bingo-vacant text-bingo-vacant hover:bg-bingo-vacant hover:text-white hover:scale-110; }
+  .seat-btn.held    { @apply bg-bingo-held/10 border-bingo-held text-bingo-held cursor-not-allowed; }
+  .seat-btn.mine    { @apply bg-bingo-mine border-bingo-mine text-white scale-110 ring-2 ring-bingo-mine ring-offset-2; }
+  .seat-btn.sold    { @apply bg-bingo-sold/10 border-bingo-sold text-bingo-sold cursor-not-allowed; }
+
+  /* Input */
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm
+           focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy
+           transition-colors bg-white placeholder:text-slate-400;
+  }
+  .input-label { @apply block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wide; }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-navy text-white font-semibold px-6 py-3 rounded-xl
+           hover:bg-navy-light active:bg-navy-dark
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
+           shadow-sm hover:shadow-md;
+  }
+  .btn-gold {
+    @apply bg-gold text-white font-bold px-8 py-3.5 rounded-xl text-base
+           hover:bg-gold-light active:bg-gold-dark
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
+           shadow-md hover:shadow-lg;
+  }
+  .btn-outline {
+    @apply border-2 border-navy text-navy font-semibold px-6 py-3 rounded-xl
+           hover:bg-navy hover:text-white transition-all duration-150;
+  }
+}
+
+/* Animated underline for nav */
+.nav-link::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #C9A84C;
+  transition: width 0.3s;
+}
+.nav-link:hover::after { width: 100%; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
