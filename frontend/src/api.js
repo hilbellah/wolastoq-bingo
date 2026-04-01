@@ -42,8 +42,18 @@ export const adminGetBookings   = (token, params = {}) => {
 export const adminGetPackages   = (token)  => request('/admin/packages',      { headers: { Authorization: `Bearer ${token}` } });
 export const adminCreateSession = (token, body) => request('/admin/sessions', { method: 'POST',  body, headers: { Authorization: `Bearer ${token}` } });
 export const adminUpdateSession = (token, id, body) => request(`/admin/sessions/${id}`, { method: 'PUT', body, headers: { Authorization: `Bearer ${token}` } });
-export const adminCreatePackage = (token, body) => request('/admin/packages', { method: 'POST',  body, headers: { Authorization: `Bearer ${token}` } });
-export const adminUpdatePackage = (token, id, body) => request(`/admin/packages/${id}`, { method: 'PUT', body, headers: { Authorization: `Bearer ${token}` } });
+export const adminCreatePackage      = (token, body) => request('/admin/packages', { method: 'POST', body, headers: { Authorization: `Bearer ${token}` } });
+export const adminUpdatePackage      = (token, id, body) => request(`/admin/packages/${id}`, { method: 'PUT', body, headers: { Authorization: `Bearer ${token}` } });
+export const adminBulkSchedule       = (token, body) => request('/admin/sessions/bulk', { method: 'POST', body, headers: { Authorization: `Bearer ${token}` } });
+
+// Announcements (public)
+export const getAnnouncements        = ()            => request('/announcements');
+
+// Announcements (admin)
+export const adminGetAnnouncements    = (token)      => request('/admin/announcements', { headers: { Authorization: `Bearer ${token}` } });
+export const adminCreateAnnouncement  = (token, body) => request('/admin/announcements', { method: 'POST', body, headers: { Authorization: `Bearer ${token}` } });
+export const adminUpdateAnnouncement  = (token, id, body) => request(`/admin/announcements/${id}`, { method: 'PUT', body, headers: { Authorization: `Bearer ${token}` } });
+export const adminDeleteAnnouncement  = (token, id)  => request(`/admin/announcements/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
 
 export const adminExportBookings = async (token, params = {}) => {
   const qs = new URLSearchParams(

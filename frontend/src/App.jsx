@@ -6,6 +6,7 @@ import Dashboard from './components/admin/Dashboard';
 import BookingsReport from './components/admin/BookingsReport';
 import SessionsManager from './components/admin/SessionsManager';
 import PackagesManager from './components/admin/PackagesManager';
+import AnnouncementsManager from './components/admin/AnnouncementsManager';
 
 export default function App() {
   return (
@@ -13,10 +14,11 @@ export default function App() {
       <Route path="/"        element={<BookingPage />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin"   element={<AdminLayout />}>
-        <Route index         element={<Dashboard />} />
+        <Route index           element={<Dashboard />} />
         <Route path="bookings" element={<BookingsReport />} />
         <Route path="sessions" element={<SessionsManager />} />
         <Route path="packages" element={<PackagesManager />} />
+        <Route path="announcements" element={<AnnouncementsManager />} />
       </Route>
     </Routes>
   );

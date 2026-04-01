@@ -93,6 +93,17 @@ function initSchema() {
       FOREIGN KEY (package_id) REFERENCES packages(id)
     );
 
+    CREATE TABLE IF NOT EXISTS announcements (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      type TEXT DEFAULT 'info' CHECK(type IN ('info','warning','special')),
+      is_active INTEGER DEFAULT 1,
+      starts_at TEXT,
+      ends_at TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_seats_session ON seats(session_id);
     CREATE INDEX IF NOT EXISTS idx_seats_status ON seats(status);
     CREATE INDEX IF NOT EXISTS idx_bookings_session ON bookings(session_id);

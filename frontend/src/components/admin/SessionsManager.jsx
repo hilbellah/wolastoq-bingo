@@ -1,6 +1,110 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { adminGetSessions, adminCreateSession, adminUpdateSession } from '../../api';
+import { adminGetSessions, adminCreateSession, adminUpdateSession, adminBulkSchedule } from '../../api';
+
+const DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAY_FULL   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function BulkScheduleForm({ token, onDone }) {
+  const today = new Date().toISOString().split('T')[0];
+  const [form, setForm] = useState({
+    startDate: today,
+    endDate: '',
+    days: [2, 4, 5, 6, 0], // Tue, Thu, Fri, Sat, Sun — matches default schedule
+    time: '18:30',
+    doors_open: '17:00',
+    replaceExisting: false,
+  });
+  const [saving, setSaving] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const toggleDay = (d) => setForm(f => ({
+    ...f,
+    days: f.days.includes(d) ? f.days.filter(x => x !== d) : [...f.days, d],
+  }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.endDate) { setError('End date is required'); return; }
+    if (!form.days.length) { setError('Select at least one day'); return; }
+    setSaving(true); setError(''); setResult(null);
+    try {
+      const res = await adminBulkSchedule(token, form);
+      setResult(res.message || `Created ${res.created} sessions`);
+      onDone();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="input-label">Start Date *</label>
+          <input type="date" className="input-field" value={form.startDate}
+            onChange={e => set('startDate', e.target.value)} />
+        </div>
+        <div>
+          <label className="input-label">End Date *</label>
+          <input type="date" className="input-field" value={form.endDate}
+            onChange={e => set('endDate', e.target.value)} />
+        </div>
+        <div>
+          <label className="input-label">Game Time</label>
+          <input type="time" className="input-field" value={form.time}
+            onChange={e => set('time', e.target.value)} />
+        </div>
+        <div>
+          <label className="input-label">Doors Open</label>
+          <input type="time" className="input-field" value={form.doors_open}
+            onChange={e => set('doors_open', e.target.value)} />
+        </div>
+      </div>
+
+      <div>
+        <label className="input-label">Days of the Week</label>
+        <div className="flex gap-2 flex-wrap mt-1">
+          {DAY_LABELS.map((label, idx) => (
+            <button key={idx} type="button"
+              onClick={() => toggleDay(idx)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors
+                ${form.days.includes(idx)
+                  ? 'bg-orange border-orange text-white'
+                  : 'bg-white border-slate-200 text-slate-500 hover:border-orange/40'}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+        {form.days.length > 0 && (
+          <p className="text-xs text-slate-400 mt-1">
+            {form.days.sort((a,b)=>a-b).map(d => DAY_FULL[d]).join(', ')}
+          </p>
+        )}
+      </div>
+
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input type="checkbox" checked={form.replaceExisting}
+          onChange={e => set('replaceExisting', e.target.checked)}
+          className="rounded border-slate-300 text-orange" />
+        <span className="text-sm text-slate-600">Replace existing sessions on conflicting dates</span>
+      </label>
+
+      {error  && <p className="text-red-500 text-sm">⚠️ {error}</p>}
+      {result && <p className="text-green-600 text-sm font-semibold">✅ {result}</p>}
+
+      <div className="flex gap-3 pt-1">
+        <button type="submit" disabled={saving} className="btn-primary">
+          {saving ? 'Generating…' : 'Generate Sessions'}
+        </button>
+      </div>
+    </form>
+  );
+}
 
 const BLANK = { date: '', time: '18:30', doors_open: '17:00', notes: '', is_active: true };
 
@@ -75,6 +179,7 @@ export default function SessionsManager() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
   const load = () => {
@@ -109,22 +214,43 @@ export default function SessionsManager() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-extrabold text-navy">Sessions</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage bingo night dates</p>
+          <p className="text-sm text-slate-500 mt-0.5">Manage bingo night dates &amp; times</p>
         </div>
-        {!creating && (
-          <button onClick={() => setCreating(true)} className="btn-primary text-sm">
-            + Add Session
-          </button>
-        )}
+        <div className="flex gap-2">
+          {!bulkOpen && !creating && (
+            <button onClick={() => setBulkOpen(true)} className="btn-outline text-sm">
+              📅 Bulk Schedule
+            </button>
+          )}
+          {!creating && !bulkOpen && (
+            <button onClick={() => setCreating(true)} className="btn-primary text-sm">
+              + Add One
+            </button>
+          )}
+        </div>
       </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">⚠️ {error}</div>
       )}
 
-      {/* Create form */}
+      {/* Bulk Schedule form */}
+      {bulkOpen && (
+        <div className="bg-white rounded-xl border-2 border-orange/30 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-bold text-navy">Bulk Schedule</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Generate sessions for a date range on selected days</p>
+            </div>
+            <button onClick={() => setBulkOpen(false)} className="text-slate-400 hover:text-slate-600 text-xl leading-none">×</button>
+          </div>
+          <BulkScheduleForm token={token} onDone={() => { setBulkOpen(false); load(); }} />
+        </div>
+      )}
+
+      {/* Create single session form */}
       {creating && (
-        <div className="bg-white rounded-xl border-2 border-navy/30 p-5">
+        <div className="bg-white rounded-xl border-2 border-orange/30 p-5">
           <h3 className="font-bold text-navy mb-4">New Session</h3>
           <SessionForm onSave={handleCreate} onCancel={() => setCreating(false)} />
         </div>

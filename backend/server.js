@@ -38,10 +38,11 @@ app.use(cors({
 app.use(express.json());
 
 // ─── Routes ─────────────────────────────────────────────────────────────────
-app.use('/api/sessions', require('./routes/sessions'));
-app.use('/api/seats',    require('./routes/seats'));
-app.use('/api/bookings', require('./routes/bookings'));
-app.use('/api/admin',    require('./routes/admin'));
+app.use('/api/sessions',      require('./routes/sessions'));
+app.use('/api/seats',         require('./routes/seats'));
+app.use('/api/bookings',      require('./routes/bookings'));
+app.use('/api/admin',         require('./routes/admin'));
+app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/packages', (req, res) => {
   const db = getDb();
   const packages = db.prepare('SELECT * FROM packages WHERE is_active=1 ORDER BY sort_order, type').all();

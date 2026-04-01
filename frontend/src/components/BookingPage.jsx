@@ -8,7 +8,7 @@ import OrderSummary from './OrderSummary';
 import PaymentForm from './PaymentForm';
 import Confirmation from './Confirmation';
 import {
-  getSessions, getSeats, getPackages,
+  getSessions, getSeats, getPackages, getAnnouncements,
   lockSeats, releaseSeats, createBooking,
   createSeatSocket,
 } from '../api';
@@ -176,12 +176,15 @@ export default function BookingPage() {
   const [payLoading, setPayLoading]           = useState(false);
   const [error, setError]                     = useState('');
   const [expandedMonths, setExpandedMonths]   = useState(null); // null = init pending
+  const [announcements, setAnnouncements]     = useState([]);
+  const [dismissedIds, setDismissedIds]       = useState(new Set());
   const wsRef = useRef(null);
   const tableSectionRef = useRef(null);
 
   useEffect(() => {
     getSessions().then(d => setSessions(d.sessions || [])).catch(() => {});
     getPackages().then(d => setPackages(d.packages || [])).catch(() => {});
+    getAnnouncements().then(d => setAnnouncements(d.announcements || [])).catch(() => {});
   }, []);
 
   // Release holds on tab close
@@ -323,6 +326,31 @@ export default function BookingPage() {
   return (
     <div className="min-h-screen bg-slate-100">
       <Header />
+
+      {/* ── ANNOUNCEMENTS BANNER ── */}
+      {announcements.filter(a => !dismissedIds.has(a.id)).map(a => {
+        const styles = {
+          info:    { bar: 'bg-blue-600',   icon: 'ℹ️',  text: 'text-white' },
+          warning: { bar: 'bg-amber-500',  icon: '⚠️',  text: 'text-white' },
+          special: { bar: 'bg-orange',     icon: '🎉',  text: 'text-white' },
+        }[a.type] || { bar: 'bg-blue-600', icon: 'ℹ️', text: 'text-white' };
+        return (
+          <div key={a.id} className={`${styles.bar} ${styles.text}`}>
+            <div className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-start gap-3">
+              <span className="text-base flex-shrink-0 mt-0.5">{styles.icon}</span>
+              <div className="flex-1 min-w-0">
+                <span className="font-bold text-sm">{a.title} </span>
+                <span className="text-sm opacity-90">{a.message}</span>
+              </div>
+              <button
+                onClick={() => setDismissedIds(prev => new Set([...prev, a.id]))}
+                className="flex-shrink-0 opacity-70 hover:opacity-100 text-lg leading-none ml-2"
+                aria-label="Dismiss"
+              >×</button>
+            </div>
+          </div>
+        );
+      })}
 
       <main className="max-w-[1400px] mx-auto px-4 py-6">
 

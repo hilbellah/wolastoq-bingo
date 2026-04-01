@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 
 const NAV_ITEMS = [
-  { to: '/admin',           label: 'Dashboard',    icon: '📊', end: true },
-  { to: '/admin/bookings',  label: 'Bookings',     icon: '🎟️' },
-  { to: '/admin/sessions',  label: 'Sessions',     icon: '📅' },
-  { to: '/admin/packages',  label: 'Packages',     icon: '📦' },
+  { to: '/admin',                label: 'Dashboard',      icon: '📊', end: true },
+  { to: '/admin/bookings',       label: 'Bookings',       icon: '🎟️' },
+  { to: '/admin/sessions',       label: 'Sessions',       icon: '📅' },
+  { to: '/admin/packages',       label: 'Packages',       icon: '📦' },
+  { to: '/admin/announcements',  label: 'Announcements',  icon: '📢' },
 ];
 
 export default function AdminLayout() {

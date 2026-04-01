@@ -348,4 +348,117 @@ router.put('/packages/:id', requireAuth, (req, res) => {
   res.json({ success: true });
 });
 
+// ─── Bulk Session Scheduler ────────────────────────────────────────────────
+// POST /api/admin/sessions/bulk
+// Body: { startDate, endDate, days: [0-6 sun=0], time, doors_open, replaceExisting }
+router.post('/sessions/bulk', requireAuth, (req, res) => {
+  const db = getDb();
+  const { startDate, endDate, days, time, doors_open, replaceExisting } = req.body;
+  if (!startDate || !endDate || !days?.length) {
+    return res.status(400).json({ error: 'startDate, endDate, and days are required' });
+  }
+
+  const tables = db.prepare('SELECT id FROM room_tables WHERE 1').all();
+  if (!tables.length) return res.status(400).json({ error: 'No tables configured' });
+
+  const insertSession = db.prepare(
+    `INSERT OR IGNORE INTO sessions (date, time, doors_open, is_active)
+     VALUES (?, ?, ?, 1)`
+  );
+  const insertSeat = db.prepare(
+    `INSERT OR IGNORE INTO seats (session_id, table_id, seat_position, status)
+     VALUES (?, ?, ?, 'vacant')`
+  );
+
+  let created = 0;
+  const start = new Date(startDate + 'T12:00:00');
+  const end   = new Date(endDate   + 'T12:00:00');
+
+  db.exec('BEGIN');
+  try {
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      if (!days.includes(d.getDay())) continue;
+      const dateStr = d.toISOString().split('T')[0];
+
+      if (replaceExisting) {
+        // Remove existing session+seats for this date so we can re-create
+        const existing = db.prepare('SELECT id FROM sessions WHERE date=?').get(dateStr);
+        if (existing) {
+          db.prepare('DELETE FROM seats WHERE session_id=?').run(existing.id);
+          db.prepare('DELETE FROM sessions WHERE id=?').run(existing.id);
+        }
+      }
+
+      const result = insertSession.run(dateStr, time || '18:30', doors_open || '17:00');
+      if (result.lastInsertRowid) {
+        const sid = result.lastInsertRowid;
+        for (const t of tables) {
+          for (let pos = 1; pos <= 6; pos++) {
+            insertSeat.run(sid, t.id, pos);
+          }
+        }
+        created++;
+      }
+    }
+    db.exec('COMMIT');
+    res.json({ created, message: `Created ${created} sessions` });
+  } catch (err) {
+    db.exec('ROLLBACK');
+    console.error('Bulk schedule error:', err);
+    res.status(500).json({ error: 'Failed to create sessions' });
+  }
+});
+
+// ─── Announcements ─────────────────────────────────────────────────────────
+// GET /api/admin/announcements
+router.get('/announcements', requireAuth, (req, res) => {
+  const db = getDb();
+  const rows = db.prepare(
+    'SELECT * FROM announcements ORDER BY created_at DESC'
+  ).all();
+  res.json({ announcements: rows });
+});
+
+// POST /api/admin/announcements
+router.post('/announcements', requireAuth, (req, res) => {
+  const db = getDb();
+  const { title, message, type, is_active, starts_at, ends_at } = req.body;
+  if (!title || !message) return res.status(400).json({ error: 'title and message are required' });
+  const result = db.prepare(`
+    INSERT INTO announcements (title, message, type, is_active, starts_at, ends_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(title, message, type || 'info', is_active !== false ? 1 : 0,
+         starts_at || null, ends_at || null);
+  res.status(201).json({ id: result.lastInsertRowid, message: 'Announcement created' });
+});
+
+// PUT /api/admin/announcements/:id
+router.put('/announcements/:id', requireAuth, (req, res) => {
+  const db = getDb();
+  const { title, message, type, is_active, starts_at, ends_at } = req.body;
+  db.prepare(`
+    UPDATE announcements SET
+      title     = COALESCE(?, title),
+      message   = COALESCE(?, message),
+      type      = COALESCE(?, type),
+      is_active = COALESCE(?, is_active),
+      starts_at = ?,
+      ends_at   = ?
+    WHERE id = ?
+  `).run(
+    title ?? null, message ?? null, type ?? null,
+    is_active !== undefined ? (is_active ? 1 : 0) : null,
+    starts_at ?? null, ends_at ?? null,
+    req.params.id
+  );
+  res.json({ success: true });
+});
+
+// DELETE /api/admin/announcements/:id
+router.delete('/announcements/:id', requireAuth, (req, res) => {
+  const db = getDb();
+  db.prepare('DELETE FROM announcements WHERE id=?').run(req.params.id);
+  res.json({ success: true });
+});
+
 module.exports = router;
