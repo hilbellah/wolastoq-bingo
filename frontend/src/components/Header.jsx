@@ -358,18 +358,17 @@ export default function Header() {
 
         {/* ── LEFT: St. Mary's identity ── */}
         <div style={{ flex:'1 1 0', minWidth:0, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', paddingRight:24, borderRight:'1px solid rgba(253,208,31,.18)' }}>
-          <div className="logo-float" style={{ width:68, height:68, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', background:'radial-gradient(circle at 35% 30%,rgba(253,208,31,.5),rgba(10,12,16,.95))', border:'2.5px solid rgba(253,208,31,.65)', boxShadow:'0 0 28px rgba(237,113,13,.45),0 0 60px rgba(253,208,31,.12)', marginBottom:10 }}>
-            <svg viewBox="0 0 40 40" width="38" height="38" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="20,2 24,14 38,14 27,22 31,34 20,26 9,34 13,22 2,14 16,14" fill="#FDD01F"/>
-              <circle cx="20" cy="20" r="7" fill="#0d0f12"/>
-              <text x="20" y="24" textAnchor="middle" fontSize="6.5" fontWeight="900" fill="#FDD01F" fontFamily="'Arial Black',Arial,sans-serif">WC</text>
-            </svg>
+          <div className="logo-float" style={{ marginBottom:8 }}>
+            <img
+              src="/smec-logo.png"
+              alt="SMEC – Your Winning Destination"
+              style={{ width:100, height:'auto', filter:'drop-shadow(0 4px 18px rgba(237,113,13,.55)) drop-shadow(0 0 32px rgba(253,208,31,.2))' }}
+            />
           </div>
           <h1 style={{ fontSize:19, fontWeight:900, color:'#fff', lineHeight:1.2, margin:'0 0 3px', textShadow:'0 2px 12px rgba(0,0,0,.9)' }}>
             St. Mary's<br/>
             <span style={{ fontSize:13, fontWeight:700, color:'rgba(255,255,255,.65)', letterSpacing:'0.04em' }}>Entertainment Centre</span>
           </h1>
-          <p className="gold-text" style={{ fontSize:8.5, fontWeight:700, letterSpacing:'0.2em', margin:'6px 0 8px' }}>✦ YOUR WINNING DESTINATION ✦</p>
           <div style={{ display:'flex', alignItems:'center', gap:5, borderRadius:999, padding:'5px 12px', background:'rgba(255,255,255,.06)', border:'1px solid rgba(253,208,31,.28)', marginBottom:8 }}>
             <span className="live-dot" style={{ width:7, height:7, borderRadius:'50%', background:'#4ade80', display:'inline-block', boxShadow:'0 0 5px #4ade80' }}/>
             <span style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,.65)', textTransform:'uppercase', letterSpacing:'0.1em' }}>Wolastoq Casino</span>
