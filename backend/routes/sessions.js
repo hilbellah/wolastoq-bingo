@@ -21,7 +21,6 @@ router.get('/', (req, res) => {
     WHERE s.is_active = 1 AND s.date >= date('now')
     GROUP BY s.id
     ORDER BY s.date ASC, s.time ASC
-    LIMIT 10
   `).all();
   res.set('Cache-Control', 'public, max-age=10, stale-while-revalidate=30');
   res.json({ sessions });
