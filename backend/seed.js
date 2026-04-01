@@ -17,15 +17,21 @@ db.exec(`
 console.log('🗑️  Cleared existing data');
 
 // ─── Packages ──────────────────────────────────────────────────────────────
-const reqPkg = db.prepare(`
+const insertPkg = db.prepare(`
   INSERT INTO packages (name, price, type, description, is_active, sort_order) VALUES (?,?,?,?,1,?)
-`).run('12up / Toonie', 18.00, 'required', '12-up Admission Book + Toonie Ball — required for every player', 1);
+`);
 
-const optPkg = db.prepare(`
-  INSERT INTO packages (name, price, type, description, is_active, sort_order) VALUES (?,?,?,?,1,?)
-`).run('3 Special Books (1 Free)', 14.00, 'optional', 'Purchase 2 Special Books and get 1 Free', 1);
+const reqPkg = insertPkg.run('12up / Toonie',            18.00, 'required', '12-up Admission Book + Toonie Ball — required for every player', 1);
+               insertPkg.run('3 Special Books (1 Free)', 14.00, 'optional', 'Purchase 2 Special Books and get 1 Free', 2);
+               insertPkg.run('Single Special Book',       7.00, 'optional', 'Single Special Book', 3);
+               insertPkg.run('6 up Admission Book',       5.00, 'optional', '6-up Admission Book', 4);
+               insertPkg.run('3 up Admission Book',       3.00, 'optional', '3-up Admission Book', 5);
+               insertPkg.run('Letter "W"',                2.00, 'optional', 'Letter W special game', 6);
+               insertPkg.run('Mega Jackpot',              2.00, 'optional', 'Mega Jackpot game', 7);
+               insertPkg.run('Winner Take All',           1.00, 'optional', 'Winner Take All game', 8);
+               insertPkg.run('MP Book',                   5.00, 'optional', 'MP Book', 9);
 
-console.log('📦  Packages created');
+console.log('📦  Packages created (1 required + 8 optional)');
 
 // ─── Room Tables ───────────────────────────────────────────────────────────
 // SMEC hall: 65 tables × 6 chairs = 390 total seats.
@@ -160,6 +166,6 @@ try {
 const totalSeats = allTables.reduce((a, t) => a + t.capacity, 0);
 console.log('\n✅  Database seeded successfully!');
 console.log(`   → ${sessions.length} sessions, ${totalSeats} seats each (65 tables × 6)`);
-console.log(`   → 2 packages (1 required, 1 optional)`);
+console.log(`   → 9 packages (1 required, 8 optional)`);
 console.log(`   → 2 sample bookings in session #1`);
 console.log('\nNext: npm run dev');

@@ -37,20 +37,38 @@ function autoSeed() {
   const { sessionCount } = db.prepare('SELECT COUNT(*) AS sessionCount FROM sessions').get();
   const { pkgCount }     = db.prepare('SELECT COUNT(*) AS pkgCount FROM packages').get();
 
-  // ── Always ensure packages exist (they may be absent if DB was partially seeded) ──
-  if (pkgCount === 0) {
-    console.log('📦  No packages found — inserting default packages…');
-    db.prepare(`
+  // ── Always ensure ALL packages exist ──────────────────────────────────────
+  // Full list from reference site. Re-seed if count is less than expected.
+  const ALL_PACKAGES = [
+    { name: '12up / Toonie',            price: 18.00, type: 'required', sort: 1,
+      desc: '12-up Admission Book + Toonie Ball — required for every player' },
+    { name: '3 Special Books (1 Free)', price: 14.00, type: 'optional', sort: 2,
+      desc: 'Purchase 2 Special Books and get 1 Free' },
+    { name: 'Single Special Book',      price:  7.00, type: 'optional', sort: 3,
+      desc: 'Single Special Book' },
+    { name: '6 up Admission Book',      price:  5.00, type: 'optional', sort: 4,
+      desc: '6-up Admission Book' },
+    { name: '3 up Admission Book',      price:  3.00, type: 'optional', sort: 5,
+      desc: '3-up Admission Book' },
+    { name: 'Letter "W"',               price:  2.00, type: 'optional', sort: 6,
+      desc: 'Letter W special game' },
+    { name: 'Mega Jackpot',             price:  2.00, type: 'optional', sort: 7,
+      desc: 'Mega Jackpot game' },
+    { name: 'Winner Take All',          price:  1.00, type: 'optional', sort: 8,
+      desc: 'Winner Take All game' },
+    { name: 'MP Book',                  price:  5.00, type: 'optional', sort: 9,
+      desc: 'MP Book' },
+  ];
+
+  if (pkgCount < ALL_PACKAGES.length) {
+    console.log(`📦  Only ${pkgCount}/${ALL_PACKAGES.length} packages found — re-seeding packages…`);
+    db.prepare('DELETE FROM packages').run();
+    const insertPkg = db.prepare(`
       INSERT INTO packages (name, price, type, description, is_active, sort_order)
       VALUES (?,?,?,?,1,?)
-    `).run('12up / Toonie', 18.00, 'required', '12-up Admission Book + Toonie Ball — required for every player', 1);
-
-    db.prepare(`
-      INSERT INTO packages (name, price, type, description, is_active, sort_order)
-      VALUES (?,?,?,?,1,?)
-    `).run('3 Special Books (1 Free)', 14.00, 'optional', 'Purchase 2 Special Books and get 1 Free', 1);
-
-    console.log('📦  Default packages inserted');
+    `);
+    for (const p of ALL_PACKAGES) insertPkg.run(p.name, p.price, p.type, p.desc, p.sort);
+    console.log(`📦  ${ALL_PACKAGES.length} packages inserted`);
   }
 
   // Check if we already have sessions — if yes, nothing more to do
