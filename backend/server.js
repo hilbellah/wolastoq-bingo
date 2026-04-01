@@ -5,6 +5,7 @@ const http = require('http');
 const path = require('path');
 const WebSocket = require('ws');
 const { getDb } = require('./db');
+const { autoSeed } = require('./autoSeed');
 
 const app = express();
 const server = http.createServer(app);
@@ -85,13 +86,12 @@ app.get('*', (req, res) => {
 // ─── Start Server ────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-  // Pre-warm the database so the first user request isn't slow
+  // Pre-warm the database AND auto-seed if it's empty (ephemeral filesystem
+  // on DigitalOcean App Platform wipes bingo.db on every deploy)
   try {
-    const db = getDb();
-    db.prepare('SELECT 1').get();
-    console.log('✅  Database warmed up');
+    autoSeed();
   } catch (e) {
-    console.error('⚠️  Database warmup failed:', e.message);
+    console.error('⚠️  Auto-seed error:', e.message);
   }
 
   console.log(`\n🎰  Wolastoq Bingo Backend running on http://localhost:${PORT}`);
