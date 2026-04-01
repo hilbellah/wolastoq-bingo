@@ -23,6 +23,7 @@ router.get('/', (req, res) => {
     ORDER BY s.date ASC, s.time ASC
     LIMIT 10
   `).all();
+  res.set('Cache-Control', 'public, max-age=10, stale-while-revalidate=30');
   res.json({ sessions });
 });
 

@@ -85,6 +85,15 @@ app.get('*', (req, res) => {
 // ─── Start Server ────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
+  // Pre-warm the database so the first user request isn't slow
+  try {
+    const db = getDb();
+    db.prepare('SELECT 1').get();
+    console.log('✅  Database warmed up');
+  } catch (e) {
+    console.error('⚠️  Database warmup failed:', e.message);
+  }
+
   console.log(`\n🎰  Wolastoq Bingo Backend running on http://localhost:${PORT}`);
   console.log(`🔌  WebSocket ready`);
   console.log(`⏱️   Seat hold duration: ${HOLD_MINUTES} minutes`);
