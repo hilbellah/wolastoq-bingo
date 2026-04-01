@@ -55,17 +55,19 @@ function autoSeed() {
   `).run('3 Special Books (1 Free)', 14.00, 'optional', 'Purchase 2 Special Books and get 1 Free', 1);
 
   // ── Room tables ────────────────────────────────────────────────────────────
-  // SMEC hall: 73 tables (1–75, skip 41 & 47), 6 chairs each = 438 seats
+  // SMEC hall: 65 tables × 6 chairs = 390 seats
+  // Present in floor plan: 1–33, 37–39, 42–45, 48–51, 55–75
+  // Not in floor plan (aisles/stage): 34–36, 40–41, 46–47, 52–54
+  const SKIP_TABLES = new Set([34, 35, 36, 40, 41, 46, 47, 52, 53, 54]);
   const insertTable = db.prepare(`
     INSERT INTO room_tables (table_number, capacity, section) VALUES (?,?,?)
   `);
   for (let n = 1; n <= 75; n++) {
-    if (n === 41 || n === 47) continue;
+    if (SKIP_TABLES.has(n)) continue;
     let section;
-    if      (n <= 24) section = 'Section A';
-    else if (n <= 40) section = 'Section B';
-    else if (n <= 46) section = 'Aisle';
-    else              section = 'Section C';
+    if      (n <= 39) section = 'Main Floor';
+    else if (n <= 51) section = 'Centre';
+    else              section = 'Side Hall';
     insertTable.run(n, 6, section);
   }
 

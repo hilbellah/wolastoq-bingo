@@ -28,16 +28,18 @@ const optPkg = db.prepare(`
 console.log('📦  Packages created');
 
 // ─── Room Tables ───────────────────────────────────────────────────────────
-// SMEC hall: each NUMBER in the floor map IS a table. 73 tables (1-75, skip 41 & 47).
-// Every table has 6 chairs = 438 total seats.
+// SMEC hall: 65 tables × 6 chairs = 390 total seats.
+// Numbers present in physical floor plan: 1–33, 37–39, 42–45, 48–51, 55–75
+// NOT in floor plan (aisles / stage area): 34–36, 40–41, 46–47, 52–54
+const SKIP_TABLES = new Set([34, 35, 36, 40, 41, 46, 47, 52, 53, 54]);
+
 const tableData = [];
 for (let n = 1; n <= 75; n++) {
-  if (n === 41 || n === 47) continue; // physical aisles, not tables
+  if (SKIP_TABLES.has(n)) continue;
   let section;
-  if      (n <= 24) section = 'Section A';
-  else if (n <= 40) section = 'Section B';
-  else if (n <= 46) section = 'Aisle';
-  else              section = 'Section C';
+  if      (n <= 39) section = 'Main Floor';
+  else if (n <= 51) section = 'Centre';
+  else              section = 'Side Hall';
   tableData.push({ table_number: n, capacity: 6, section });
 }
 
@@ -157,7 +159,7 @@ try {
 
 const totalSeats = allTables.reduce((a, t) => a + t.capacity, 0);
 console.log('\n✅  Database seeded successfully!');
-console.log(`   → ${sessions.length} sessions, ${totalSeats} seats each`);
+console.log(`   → ${sessions.length} sessions, ${totalSeats} seats each (65 tables × 6)`);
 console.log(`   → 2 packages (1 required, 1 optional)`);
 console.log(`   → 2 sample bookings in session #1`);
 console.log('\nNext: npm run dev');
