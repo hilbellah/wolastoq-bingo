@@ -1,159 +1,238 @@
 import { useState, useEffect } from 'react';
 
+/**
+ * AttendeeForms — table-style booking form matching reference site.
+ *
+ * Layout per person row:
+ *   First Name | Last Name | Required (badge) | Optional Item (select) | Qty | Add
+ *
+ * Added optional items appear below the table as a per-person chip list.
+ * A running TOTAL is shown at the bottom before the Continue button.
+ */
+
 export default function AttendeeForms({ attendees, requiredPkg, optionalPkgs, onComplete, readOnly }) {
-  const [local, setLocal] = useState(attendees);
-  const [errors, setErrors] = useState({});
+  const [local, setLocal]       = useState(attendees);
+  const [errors, setErrors]     = useState({});
+  // pendingOpt[i] = { pkgId, qty } — what's staged in the dropdown but not yet "Added"
+  const [pendingOpt, setPendingOpt] = useState(() =>
+    attendees.map(() => ({ pkgId: optionalPkgs[0]?.id ?? null, qty: 1 }))
+  );
 
-  useEffect(() => setLocal(attendees), [attendees]);
+  useEffect(() => {
+    setLocal(attendees);
+    setPendingOpt(attendees.map(() => ({ pkgId: optionalPkgs[0]?.id ?? null, qty: 1 })));
+  }, [attendees]);
 
-  const update = (i, field, val) => {
+  // ── helpers ────────────────────────────────────────────────────────────────
+  const updateField = (i, field, val) => {
     setLocal(prev => prev.map((a, idx) => idx === i ? { ...a, [field]: val } : a));
     setErrors(prev => ({ ...prev, [`${i}-${field}`]: '' }));
   };
 
-  const setOptQty = (i, pkgId, qty) => {
+  const addOptional = (i) => {
+    const { pkgId, qty } = pendingOpt[i];
+    if (!pkgId || qty <= 0) return;
     setLocal(prev => prev.map((a, idx) => {
       if (idx !== i) return a;
-      const optionals = qty > 0
-        ? [...a.optionals.filter(o => o.packageId !== pkgId), { packageId: pkgId, quantity: qty }]
-        : a.optionals.filter(o => o.packageId !== pkgId);
+      const existing = a.optionals.find(o => o.packageId === pkgId);
+      const optionals = existing
+        ? a.optionals.map(o => o.packageId === pkgId ? { ...o, quantity: o.quantity + qty } : o)
+        : [...a.optionals, { packageId: pkgId, quantity: qty }];
       return { ...a, optionals };
+    }));
+    // reset qty back to 1
+    setPendingOpt(prev => prev.map((p, idx) => idx === i ? { ...p, qty: 1 } : p));
+  };
+
+  const removeOptional = (i, pkgId) => {
+    setLocal(prev => prev.map((a, idx) => {
+      if (idx !== i) return a;
+      return { ...a, optionals: a.optionals.filter(o => o.packageId !== pkgId) };
     }));
   };
 
-  const getOptQty = (a, pkgId) => a.optionals?.find(o => o.packageId === pkgId)?.quantity || 0;
+  const setPending = (i, field, val) =>
+    setPendingOpt(prev => prev.map((p, idx) => idx === i ? { ...p, [field]: val } : p));
 
-  const calcSubtotal = (a) => {
-    let total = requiredPkg?.price || 0;
-    for (const opt of (a.optionals || [])) {
-      const pkg = optionalPkgs.find(p => p.id === opt.packageId);
-      if (pkg) total += pkg.price * opt.quantity;
-    }
-    return total;
+  const personSubtotal = (a) => {
+    const req = requiredPkg?.price || 0;
+    return req + (a.optionals || []).reduce((sum, o) => {
+      const pkg = optionalPkgs.find(p => p.id === o.packageId);
+      return sum + (pkg ? pkg.price * o.quantity : 0);
+    }, 0);
   };
+
+  const grandTotal = local.reduce((s, a) => s + personSubtotal(a), 0);
 
   const validate = () => {
     const errs = {};
     local.forEach((a, i) => {
-      if (!a.firstName.trim()) errs[`${i}-firstName`] = 'First name required';
-      if (!a.lastName.trim())  errs[`${i}-lastName`]  = 'Last name required';
+      if (!a.firstName.trim()) errs[`${i}-firstName`] = 'Required';
+      if (!a.lastName.trim())  errs[`${i}-lastName`]  = 'Required';
     });
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleContinue = () => {
-    if (validate()) onComplete(local);
-  };
+  const handleContinue = () => { if (validate()) onComplete(local); };
 
   return (
     <div className="space-y-4">
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
-        <strong>Required:</strong> Every person must have the <strong>{requiredPkg?.name}</strong> package (${requiredPkg?.price.toFixed(2)}). Optional add-ons are available per person.
+      {/* Instruction banner */}
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 leading-relaxed">
+        <strong>INSTRUCTION:</strong> Booking cuts off at 12:30 PM.
+        {optionalPkgs.length > 0 && (
+          <> To add Optional Items, select the item, set a Quantity, then click <strong>Add Item</strong>.</>
+        )}
       </div>
 
-      {local.map((attendee, i) => (
-        <div key={i} className="border border-slate-100 rounded-xl overflow-hidden">
-          {/* Card Header */}
-          <div className="bg-navy/5 px-4 py-2 flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-navy text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
-              {i + 1}
-            </div>
-            <span className="text-sm font-semibold text-navy">Person {i + 1}</span>
-            <span className="ml-auto text-sm font-bold text-navy">
-              ${calcSubtotal(attendee).toFixed(2)}
-            </span>
-          </div>
+      {/* Table */}
+      <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <table className="w-full text-sm min-w-[560px]">
+          <thead>
+            <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wide">
+              <th className="px-3 py-2.5 text-left w-[140px]">First Name</th>
+              <th className="px-3 py-2.5 text-left w-[140px]">Last Name</th>
+              <th className="px-3 py-2.5 text-left">Required</th>
+              {!readOnly && optionalPkgs.length > 0 && <>
+                <th className="px-3 py-2.5 text-left">Optional Item</th>
+                <th className="px-3 py-2.5 text-center w-16">Qty</th>
+                <th className="px-3 py-2.5 text-center w-20">Add Item</th>
+              </>}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {local.map((attendee, i) => (
+              <>
+                {/* ── Main row ── */}
+                <tr key={`row-${i}`} className="bg-white hover:bg-slate-50/50 transition-colors">
+                  {/* First Name */}
+                  <td className="px-3 py-2">
+                    <input
+                      type="text"
+                      placeholder="First name"
+                      value={attendee.firstName}
+                      onChange={e => updateField(i, 'firstName', e.target.value)}
+                      readOnly={readOnly}
+                      className={`w-full text-sm px-2.5 py-1.5 rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-orange/40 transition-colors
+                        ${errors[`${i}-firstName`] ? 'border-red-400' : 'border-slate-200 focus:border-orange/60'}`}
+                    />
+                    {errors[`${i}-firstName`] && (
+                      <p className="text-red-500 text-[10px] mt-0.5">{errors[`${i}-firstName`]}</p>
+                    )}
+                  </td>
 
-          {/* Card Body */}
-          <div className="p-4 space-y-3">
-            {/* Name row */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="input-label">First Name *</label>
-                <input
-                  type="text"
-                  className={`input-field ${errors[`${i}-firstName`] ? 'border-red-400 ring-1 ring-red-400' : ''}`}
-                  placeholder="First name"
-                  value={attendee.firstName}
-                  onChange={e => update(i, 'firstName', e.target.value)}
-                  readOnly={readOnly}
-                />
-                {errors[`${i}-firstName`] && <p className="text-red-500 text-xs mt-1">{errors[`${i}-firstName`]}</p>}
-              </div>
-              <div>
-                <label className="input-label">Last Name *</label>
-                <input
-                  type="text"
-                  className={`input-field ${errors[`${i}-lastName`] ? 'border-red-400 ring-1 ring-red-400' : ''}`}
-                  placeholder="Last name"
-                  value={attendee.lastName}
-                  onChange={e => update(i, 'lastName', e.target.value)}
-                  readOnly={readOnly}
-                />
-                {errors[`${i}-lastName`] && <p className="text-red-500 text-xs mt-1">{errors[`${i}-lastName`]}</p>}
-              </div>
-            </div>
+                  {/* Last Name */}
+                  <td className="px-3 py-2">
+                    <input
+                      type="text"
+                      placeholder="Last name"
+                      value={attendee.lastName}
+                      onChange={e => updateField(i, 'lastName', e.target.value)}
+                      readOnly={readOnly}
+                      className={`w-full text-sm px-2.5 py-1.5 rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-orange/40 transition-colors
+                        ${errors[`${i}-lastName`] ? 'border-red-400' : 'border-slate-200 focus:border-orange/60'}`}
+                    />
+                    {errors[`${i}-lastName`] && (
+                      <p className="text-red-500 text-[10px] mt-0.5">{errors[`${i}-lastName`]}</p>
+                    )}
+                  </td>
 
-            {/* Required package */}
-            <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-              <span className="text-green-600 text-lg">✓</span>
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-green-800">Required Package</p>
-                <p className="text-sm font-bold text-green-900">{requiredPkg?.name}</p>
-              </div>
-              <span className="text-sm font-bold text-green-700">${requiredPkg?.price.toFixed(2)}</span>
-            </div>
-
-            {/* Optional add-ons */}
-            {optionalPkgs.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Optional Add-ons</p>
-                {optionalPkgs.map(pkg => {
-                  const qty = getOptQty(attendee, pkg.id);
-                  return (
-                    <div key={pkg.id} className="flex items-center gap-3 py-2 border-b border-slate-50 last:border-0">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-700">{pkg.name}</p>
-                        <p className="text-xs text-slate-400">${pkg.price.toFixed(2)} each</p>
+                  {/* Required package */}
+                  <td className="px-3 py-2">
+                    {requiredPkg ? (
+                      <div className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-green-800 whitespace-nowrap">
+                        <span className="text-green-500 font-bold">✓</span>
+                        <span>${requiredPkg.price.toFixed(2)} – {requiredPkg.name}</span>
                       </div>
-                      {!readOnly && (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => setOptQty(i, pkg.id, Math.max(0, qty - 1))}
-                            className="w-7 h-7 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-100 font-bold text-sm flex items-center justify-center"
-                          >−</button>
-                          <span className="w-6 text-center text-sm font-semibold">{qty}</span>
-                          <button
-                            onClick={() => setOptQty(i, pkg.id, qty + 1)}
-                            className="w-7 h-7 rounded-full border border-navy/30 text-navy hover:bg-navy hover:text-white font-bold text-sm flex items-center justify-center transition-colors"
-                          >+</button>
-                        </div>
-                      )}
-                      {readOnly && <span className="text-sm text-slate-500">×{qty}</span>}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
+                    ) : (
+                      <span className="text-xs text-slate-400 italic">—</span>
+                    )}
+                  </td>
 
-      {/* Running total */}
-      <div className="flex justify-between items-center border-t border-slate-100 pt-3">
-        <span className="text-sm text-slate-500">Subtotal (excl. convenience fee)</span>
-        <span className="text-lg font-extrabold text-navy">
-          ${local.reduce((sum, a) => sum + (requiredPkg?.price || 0) + (a.optionals || []).reduce((s, o) => {
-            const pkg = optionalPkgs.find(p => p.id === o.packageId);
-            return s + (pkg ? pkg.price * o.quantity : 0);
-          }, 0), 0).toFixed(2)}
+                  {/* Optional item selector (edit mode only) */}
+                  {!readOnly && optionalPkgs.length > 0 && (
+                    <>
+                      <td className="px-3 py-2">
+                        <select
+                          value={pendingOpt[i]?.pkgId ?? ''}
+                          onChange={e => setPending(i, 'pkgId', Number(e.target.value))}
+                          className="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange/60 min-w-[160px]"
+                        >
+                          {optionalPkgs.map(p => (
+                            <option key={p.id} value={p.id}>
+                              ${p.price.toFixed(2)} – {p.name}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          min="1"
+                          value={pendingOpt[i]?.qty ?? 1}
+                          onChange={e => setPending(i, 'qty', Math.max(1, Number(e.target.value)))}
+                          className="w-full text-xs text-center px-2 py-1.5 rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-orange/40"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <button
+                          type="button"
+                          onClick={() => addOptional(i)}
+                          className="bg-navy text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-navy-dark transition-colors whitespace-nowrap"
+                        >
+                          + Add
+                        </button>
+                      </td>
+                    </>
+                  )}
+                </tr>
+
+                {/* ── Added optionals row (spans full width) ── */}
+                {(attendee.optionals || []).length > 0 && (
+                  <tr key={`opts-${i}`} className="bg-blue-50/40">
+                    <td colSpan={readOnly || optionalPkgs.length === 0 ? 3 : 6} className="px-3 py-1.5">
+                      <div className="flex flex-wrap gap-1.5 items-center">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mr-1">Add-ons:</span>
+                        {attendee.optionals.map(opt => {
+                          const pkg = optionalPkgs.find(p => p.id === opt.packageId);
+                          if (!pkg) return null;
+                          return (
+                            <span key={opt.packageId}
+                              className="inline-flex items-center gap-1 bg-blue-100 border border-blue-200 rounded-full px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                              {pkg.name} ×{opt.quantity}
+                              <span className="text-blue-500 font-bold">${(pkg.price * opt.quantity).toFixed(2)}</span>
+                              {!readOnly && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeOptional(i, opt.packageId)}
+                                  className="ml-0.5 text-blue-400 hover:text-red-500 font-bold text-xs leading-none transition-colors"
+                                >×</button>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Total */}
+      <div className="flex justify-between items-center pt-2 border-t border-slate-200">
+        <span className="text-sm font-semibold text-slate-500">
+          TOTAL: <span className="text-[10px] text-slate-400">(excl. convenience fee)</span>
         </span>
+        <span className="text-xl font-extrabold text-navy">${grandTotal.toFixed(2)}</span>
       </div>
 
       {!readOnly && (
         <button onClick={handleContinue} className="btn-primary w-full">
-          Continue to Seat Selection →
+          Continue to Payment →
         </button>
       )}
     </div>

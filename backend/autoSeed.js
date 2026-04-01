@@ -34,25 +34,32 @@ function getUpcomingSessions(count = 7) {
 function autoSeed() {
   const db = getDb();
 
-  // Check if we already have sessions — if yes, nothing to do
-  const { count } = db.prepare('SELECT COUNT(*) AS count FROM sessions').get();
-  if (count > 0) {
-    console.log(`✅  DB already seeded (${count} sessions), skipping auto-seed`);
+  const { sessionCount } = db.prepare('SELECT COUNT(*) AS sessionCount FROM sessions').get();
+  const { pkgCount }     = db.prepare('SELECT COUNT(*) AS pkgCount FROM packages').get();
+
+  // ── Always ensure packages exist (they may be absent if DB was partially seeded) ──
+  if (pkgCount === 0) {
+    console.log('📦  No packages found — inserting default packages…');
+    db.prepare(`
+      INSERT INTO packages (name, price, type, description, is_active, sort_order)
+      VALUES (?,?,?,?,1,?)
+    `).run('12up / Toonie', 18.00, 'required', '12-up Admission Book + Toonie Ball — required for every player', 1);
+
+    db.prepare(`
+      INSERT INTO packages (name, price, type, description, is_active, sort_order)
+      VALUES (?,?,?,?,1,?)
+    `).run('3 Special Books (1 Free)', 14.00, 'optional', 'Purchase 2 Special Books and get 1 Free', 1);
+
+    console.log('📦  Default packages inserted');
+  }
+
+  // Check if we already have sessions — if yes, nothing more to do
+  if (sessionCount > 0) {
+    console.log(`✅  DB already seeded (${sessionCount} sessions), skipping session auto-seed`);
     return;
   }
 
   console.log('🌱  Empty database detected — running auto-seed…');
-
-  // ── Packages ───────────────────────────────────────────────────────────────
-  const reqPkg = db.prepare(`
-    INSERT INTO packages (name, price, type, description, is_active, sort_order)
-    VALUES (?,?,?,?,1,?)
-  `).run('12up / Toonie', 18.00, 'required', '12-up Admission Book + Toonie Ball — required for every player', 1);
-
-  db.prepare(`
-    INSERT INTO packages (name, price, type, description, is_active, sort_order)
-    VALUES (?,?,?,?,1,?)
-  `).run('3 Special Books (1 Free)', 14.00, 'optional', 'Purchase 2 Special Books and get 1 Free', 1);
 
   // ── Room tables ────────────────────────────────────────────────────────────
   // SMEC hall: 65 tables × 6 chairs = 390 seats
