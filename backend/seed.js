@@ -79,7 +79,7 @@ const insertSeat = db.prepare(`
   INSERT INTO seats (session_id, table_id, seat_position, status) VALUES (?,?,?,'vacant')
 `);
 
-const sessions = getUpcomingSessions(7);
+const sessions = getUpcomingSessions(60);
 const sessionIds = [];
 
 db.exec('BEGIN');

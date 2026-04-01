@@ -85,7 +85,7 @@ function autoSeed() {
     VALUES (?,?,?,'vacant')
   `);
 
-  const sessions = getUpcomingSessions(7);
+  const sessions = getUpcomingSessions(60);
 
   db.exec('BEGIN');
   try {

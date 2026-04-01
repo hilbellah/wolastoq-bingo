@@ -148,6 +148,7 @@ function BookingPanel({
             attendees={attendees}
             selectedSeats={selectedSeats}
             requiredPkg={requiredPkg}
+            optionalPkgs={optionalPkgs}
           />
           <PaymentForm onSubmit={onPay} loading={payLoading} />
         </div>
@@ -326,53 +327,78 @@ export default function BookingPage() {
 
         {/* ── DATE PICKER ── */}
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm mb-5">
-          <div className="mb-3">
-            <h2 className="text-base font-extrabold text-navy">Select a Bingo Night</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Pick a date — the seat map updates instantly</p>
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-extrabold text-navy">Select a Bingo Night</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Pick a date — the seat map updates instantly</p>
+            </div>
+            {sessions.length > 0 && (
+              <span className="text-xs text-slate-400 font-medium">{sessions.length} upcoming nights</span>
+            )}
           </div>
-          <div className="flex flex-wrap gap-2">
-            {sessions.length === 0 ? (
-              <p className="text-sm text-slate-400 animate-pulse py-2">Loading sessions…</p>
-            ) : sessions.map(session => {
-              const d = new Date(session.date + 'T12:00:00');
-              const isSelected = selectedSession?.id === session.id;
-              const isFull     = (session.available_seats || 0) === 0;
-              const sold       = (session.total_seats || 0) - (session.available_seats || 0);
-              const pct        = session.total_seats > 0
-                ? Math.round(sold / session.total_seats * 100) : 0;
 
-              return (
-                <button key={session.id} disabled={isFull} onClick={() => selectSession(session)}
-                  className={`rounded-xl border-2 px-3 py-2 text-left transition-all min-w-[100px]
-                    ${isSelected
-                      ? 'bg-navy border-navy text-white shadow-md'
-                      : isFull
-                      ? 'bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed'
-                      : 'bg-white border-slate-200 hover:border-navy/40 hover:shadow-sm cursor-pointer'}`}>
-                  <p className={`text-[10px] font-bold uppercase tracking-wide
-                    ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>
-                    {d.toLocaleDateString('en-CA', { weekday: 'short' })}
-                  </p>
-                  <p className={`text-xl font-extrabold leading-tight ${isSelected ? 'text-white' : 'text-navy'}`}>
-                    {d.getDate()} <span className="text-sm font-semibold">
-                      {d.toLocaleDateString('en-CA', { month: 'short' })}
-                    </span>
-                  </p>
-                  <p className={`text-[11px] font-medium mt-0.5
-                    ${isSelected ? 'text-white/70' : 'text-slate-500'}`}>{session.time}</p>
-                  <div className={`w-full rounded-full h-1 mt-1.5 ${isSelected ? 'bg-white/20' : 'bg-slate-100'}`}>
-                    <div className={`h-1 rounded-full ${isSelected ? 'bg-gold' : pct >= 80 ? 'bg-red-400' : 'bg-navy/40'}`}
-                      style={{ width: `${pct}%` }} />
+          {sessions.length === 0 ? (
+            <p className="text-sm text-slate-400 animate-pulse py-2">Loading sessions…</p>
+          ) : (() => {
+            // Group sessions by "Month Year"
+            const groups = [];
+            let lastKey = null;
+            for (const session of sessions) {
+              const d = new Date(session.date + 'T12:00:00');
+              const key = d.toLocaleDateString('en-CA', { month: 'long', year: 'numeric' });
+              if (key !== lastKey) { groups.push({ key, sessions: [] }); lastKey = key; }
+              groups[groups.length - 1].sessions.push(session);
+            }
+            return (
+              <div className="space-y-4">
+                {groups.map(group => (
+                  <div key={group.key}>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{group.key}</p>
+                    <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'thin' }}>
+                      {group.sessions.map(session => {
+                        const d = new Date(session.date + 'T12:00:00');
+                        const isSelected = selectedSession?.id === session.id;
+                        const isFull     = (session.available_seats || 0) === 0;
+                        const sold       = (session.total_seats || 0) - (session.available_seats || 0);
+                        const pct        = session.total_seats > 0
+                          ? Math.round(sold / session.total_seats * 100) : 0;
+                        return (
+                          <button key={session.id} disabled={isFull} onClick={() => selectSession(session)}
+                            className={`rounded-xl border-2 px-3 py-2 text-left transition-all flex-shrink-0 w-[100px]
+                              ${isSelected
+                                ? 'bg-navy border-navy text-white shadow-md'
+                                : isFull
+                                ? 'bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed'
+                                : 'bg-white border-slate-200 hover:border-navy/40 hover:shadow-sm cursor-pointer'}`}>
+                            <p className={`text-[10px] font-bold uppercase tracking-wide
+                              ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>
+                              {d.toLocaleDateString('en-CA', { weekday: 'short' })}
+                            </p>
+                            <p className={`text-xl font-extrabold leading-tight ${isSelected ? 'text-white' : 'text-navy'}`}>
+                              {d.getDate()} <span className="text-sm font-semibold">
+                                {d.toLocaleDateString('en-CA', { month: 'short' })}
+                              </span>
+                            </p>
+                            <p className={`text-[11px] font-medium mt-0.5
+                              ${isSelected ? 'text-white/70' : 'text-slate-500'}`}>{session.time}</p>
+                            <div className={`w-full rounded-full h-1 mt-1.5 ${isSelected ? 'bg-white/20' : 'bg-slate-100'}`}>
+                              <div className={`h-1 rounded-full ${isSelected ? 'bg-gold' : pct >= 80 ? 'bg-red-400' : 'bg-navy/40'}`}
+                                style={{ width: `${pct}%` }} />
+                            </div>
+                            <p className={`text-[10px] font-semibold mt-0.5
+                              ${isSelected ? 'text-white/60' : isFull ? 'text-red-500'
+                              : (session.available_seats || 0) <= 10 ? 'text-amber-600' : 'text-green-600'}`}>
+                              {isFull ? 'SOLD OUT' : `${session.available_seats} open`}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <p className={`text-[10px] font-semibold mt-0.5
-                    ${isSelected ? 'text-white/60' : isFull ? 'text-red-500'
-                    : (session.available_seats || 0) <= 10 ? 'text-amber-600' : 'text-green-600'}`}>
-                    {isFull ? 'SOLD OUT' : `${session.available_seats} open`}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
 
         {/* ── TWO-COLUMN LAYOUT ── */}
